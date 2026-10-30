@@ -1,0 +1,642 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carte de membre - Élites en Informatique</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #eef2f7;
+    color: #17243a;
+}
+
+header {
+    background: linear-gradient(120deg,#071c38,#075b91);
+    color: white;
+    text-align: center;
+    padding: 30px 15px;
+}
+
+header h1 {
+    font-size: 23px;
+    margin-bottom: 8px;
+}
+
+header p {
+    font-size: 13px;
+    opacity: .85;
+}
+
+.container {
+    max-width: 950px;
+    margin: 25px auto;
+    padding: 15px;
+}
+
+.panel {
+    background: white;
+    padding: 23px;
+    border-radius: 14px;
+    box-shadow: 0 5px 20px #0000000c;
+    margin-bottom: 22px;
+}
+
+.panel h2 {
+    color: #075b91;
+    font-size: 19px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e5edf5;
+    padding-bottom: 12px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 15px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.field.full {
+    grid-column: 1/-1;
+}
+
+label {
+    font-weight: bold;
+    font-size: 13px;
+}
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d4dce7;
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+    background: white;
+}
+
+input:focus, select:focus {
+    border-color: #0877bd;
+}
+
+.photo-box {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 5px;
+}
+
+#photoPreview {
+    width: 85px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #d9e5f1;
+    display: none;
+}
+
+button {
+    border: none;
+    padding: 14px 18px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.generate {
+    background: #0877bd;
+    color: white;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.generate:active {
+    background: #064e7d;
+}
+
+.download {
+    background: #087d50;
+    color: white;
+    width: 100%;
+    margin-top: 15px;
+}
+
+#result {
+    display: none;
+}
+
+.card-wrapper {
+    overflow-x: auto;
+    padding: 12px 0;
+}
+
+.member-card {
+    width: 860px;
+    height: 540px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(125deg,#071c38,#075b91);
+    color: white;
+    border-radius: 24px;
+    padding: 30px;
+    margin: auto;
+}
+
+.card-top {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-bottom: 2px solid #ffffff55;
+    padding-bottom: 18px;
+}
+
+.logo {
+    width: 65px;
+    height: 65px;
+    border: 2px solid #d6b45a;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: bold;
+    color: #f4d47d;
+}
+
+.card-heading h2 {
+    font-size: 25px;
+    letter-spacing: 1px;
+}
+
+.card-heading p {
+    font-size: 15px;
+    color: #d5e9f8;
+    margin-top: 5px;
+}
+
+.card-title {
+    text-align: center;
+    color: #f4d47d;
+    font-size: 22px;
+    letter-spacing: 5px;
+    margin: 20px 0;
+}
+
+.card-content {
+    display: flex;
+    gap: 25px;
+}
+
+.card-photo {
+    width: 175px;
+    height: 205px;
+    border: 4px solid #f4d47d;
+    border-radius: 12px;
+    object-fit: cover;
+    background: white;
+}
+
+.card-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.card-details p {
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: #e5f2fc;
+    overflow-wrap: anywhere;
+}
+
+.card-details strong {
+    color: #f4d47d;
+}
+
+.card-footer {
+    position: absolute;
+    bottom: 23px;
+    left: 30px;
+    right: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #ffffff55;
+    padding-top: 13px;
+    font-size: 13px;
+}
+
+.card-footer strong {
+    color: #f4d47d;
+}
+
+.watermark {
+    position: absolute;
+    right: -30px;
+    bottom: 70px;
+    font-size: 115px;
+    font-weight: bold;
+    opacity: .045;
+    transform: rotate(-15deg);
+    pointer-events: none;
+}
+
+.notice {
+    background: #fff8e5;
+    border-left: 4px solid #e3ae35;
+    padding: 12px;
+    font-size: 12px;
+    margin-top: 15px;
+    border-radius: 5px;
+}
+
+@media(max-width:600px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .field.full {
+        grid-column: auto;
+    }
+
+    .panel {
+        padding: 16px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>LES ÉLITES EN INFORMATIQUE</h1>
+    <p>Plateforme officielle de génération des cartes de membre</p>
+</header>
+
+<div class="container">
+
+<div class="panel">
+    <h2>Formulaire d'identification du membre</h2>
+
+    <form id="memberForm">
+
+    <div class="form-grid">
+
+        <div class="field">
+            <label>Nom</label>
+            <input id="nom" required placeholder="Nom de famille">
+        </div>
+
+        <div class="field">
+            <label>Postnom</label>
+            <input id="postnom" required placeholder="Postnom">
+        </div>
+
+        <div class="field">
+            <label>Prénom</label>
+            <input id="prenom" required placeholder="Prénom">
+        </div>
+
+        <div class="field">
+            <label>Sexe</label>
+            <select id="sexe" required>
+                <option value="">Choisir</option>
+                <option>Masculin</option>
+                <option>Féminin</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Date de naissance</label>
+            <input type="date" id="naissance" required>
+        </div>
+
+        <div class="field">
+            <label>Lieu de naissance</label>
+            <input id="lieu" required placeholder="Ville ou commune">
+        </div>
+
+        <div class="field">
+            <label>Nationalité</label>
+            <input id="nationalite" required placeholder="Ex : Congolaise">
+        </div>
+
+        <div class="field">
+            <label>Téléphone</label>
+            <input type="tel" id="telephone" required placeholder="+243...">
+        </div>
+
+        <div class="field">
+            <label>Adresse résidentielle</label>
+            <input id="adresse" required placeholder="Adresse complète">
+        </div>
+
+        <div class="field">
+            <label>Adresse e-mail</label>
+            <input type="email" id="email" placeholder="Ex : membre@gmail.com">
+        </div>
+
+        <div class="field">
+            <label>Numéro matricule</label>
+            <input id="matricule" required placeholder="Ex : ELI-2026-001">
+        </div>
+
+        <div class="field">
+            <label>Date d'adhésion</label>
+            <input type="date" id="adhesion" required>
+        </div>
+
+        <div class="field full">
+            <label>Fonction au sein du groupe</label>
+            <select id="fonction" required>
+                <option value="">Sélectionner une fonction</option>
+                <option>Coordonnateur</option>
+                <option>Coordonnateur adjoint</option>
+                <option>Comptable</option>
+                <option>Caissière</option>
+                <option>Secrétaire titulaire</option>
+                <option>Secrétaire adjoint</option>
+                <option>Conseiller</option>
+                <option>Responsable technique</option>
+                <option>Membre</option>
+            </select>
+        </div>
+
+        <div class="field full">
+            <label>Photo d'identité du membre</label>
+            <div class="photo-box">
+                <input type="file" id="photo" accept="image/*" required>
+                <img id="photoPreview" alt="Photo du membre">
+            </div>
+        </div>
+
+    </div>
+
+    <button type="submit" class="generate">
+        GÉNÉRER MA CARTE DE MEMBRE
+    </button>
+
+    </form>
+
+    <div class="notice">
+        Veuillez vérifier toutes vos informations avant de générer votre carte.
+        Le numéro matricule doit être unique et attribué par les responsables du groupe.
+    </div>
+</div>
+
+<div class="panel" id="result">
+
+    <h2>Aperçu de votre carte de membre</h2>
+
+    <div class="card-wrapper">
+
+        <div class="member-card" id="memberCard">
+
+            <div class="watermark">ELI</div>
+
+            <div class="card-top">
+
+                <div class="logo">ELI</div>
+
+                <div class="card-heading">
+                    <h2>LES ÉLITES EN INFORMATIQUE</h2>
+                    <p>EXCELLENCE • INNOVATION • SOLIDARITÉ</p>
+                </div>
+
+            </div>
+
+            <div class="card-title">CARTE DE MEMBRE</div>
+
+            <div class="card-content">
+
+                <img id="cardPhoto"
+                     class="card-photo"
+                     alt="Photo membre">
+
+                <div class="card-details">
+
+                    <p><strong>NOM COMPLET :</strong>
+                    <span id="cNom"></span></p>
+
+                    <p><strong>SEXE :</strong>
+                    <span id="cSexe"></span></p>
+
+                    <p><strong>NAISSANCE :</strong>
+                    <span id="cNaissance"></span></p>
+
+                    <p><strong>LIEU :</strong>
+                    <span id="cLieu"></span></p>
+
+                    <p><strong>NATIONALITÉ :</strong>
+                    <span id="cNationalite"></span></p>
+
+                    <p><strong>FONCTION :</strong>
+                    <span id="cFonction"></span></p>
+
+                    <p><strong>MATRICULE :</strong>
+                    <span id="cMatricule"></span></p>
+
+                    <p><strong>TÉLÉPHONE :</strong>
+                    <span id="cTelephone"></span></p>
+
+                    <p><strong>ADHÉSION :</strong>
+                    <span id="cAdhesion"></span></p>
+
+                </div>
+
+            </div>
+
+            <div class="card-footer">
+                <div>
+                    <strong>MEMBRE OFFICIEL</strong>
+                    <br>LES ÉLITES EN INFORMATIQUE
+                </div>
+
+                <div>
+                    <strong>IDENTIFICATION</strong>
+                    <br>ELI - CARTE PERSONNELLE
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <button class="download" onclick="downloadPDF()">
+        TÉLÉCHARGER MA CARTE EN PDF
+    </button>
+
+    <button onclick="window.print()"
+        style="background:#263b55;color:white;width:100%;margin-top:10px">
+        IMPRIMER LA CARTE
+    </button>
+
+</div>
+
+</div>
+
+<script>
+
+const form = document.getElementById("memberForm");
+
+let photoData = "";
+
+document.getElementById("photo").addEventListener("change", function(e) {
+
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+        alert("Veuillez sélectionner une image valide.");
+        this.value = "";
+        return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+        alert("La photo ne doit pas dépasser 5 Mo.");
+        this.value = "";
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function(event) {
+        photoData = event.target.result;
+
+        const preview = document.getElementById("photoPreview");
+        preview.src = photoData;
+        preview.style.display = "block";
+    };
+
+    reader.readAsDataURL(file);
+
+});
+
+function formatDate(value) {
+
+    if (!value) return "";
+
+    const parts = value.split("-");
+
+    return parts[2] + "/" + parts[1] + "/" + parts[0];
+}
+
+form.addEventListener("submit", function(e) {
+
+    e.preventDefault();
+
+    if (!photoData) {
+        alert("Veuillez ajouter votre photo.");
+        return;
+    }
+
+    const get = id => document.getElementById(id).value.trim();
+
+    document.getElementById("cNom").textContent =
+        [get("nom"), get("postnom"), get("prenom")].join(" ").toUpperCase();
+
+    document.getElementById("cSexe").textContent = get("sexe");
+
+    document.getElementById("cNaissance").textContent =
+        formatDate(get("naissance"));
+
+    document.getElementById("cLieu").textContent = get("lieu");
+
+    document.getElementById("cNationalite").textContent =
+        get("nationalite");
+
+    document.getElementById("cFonction").textContent =
+        get("fonction");
+
+    document.getElementById("cMatricule").textContent =
+        get("matricule");
+
+    document.getElementById("cTelephone").textContent =
+        get("telephone");
+
+    document.getElementById("cAdhesion").textContent =
+        formatDate(get("adhesion"));
+
+    document.getElementById("cardPhoto").src = photoData;
+
+    document.getElementById("result").style.display = "block";
+
+    document.getElementById("result").scrollIntoView({
+        behavior: "smooth"
+    });
+
+});
+
+async function downloadPDF() {
+
+    const card = document.getElementById("memberCard");
+
+    if (!photoData) {
+        alert("Veuillez d'abord générer votre carte.");
+        return;
+    }
+
+    if (!window.html2canvas || !window.jspdf) {
+        alert("Bibliothèques PDF indisponibles. Vérifiez votre connexion Internet.");
+        return;
+    }
+
+    try {
+
+        const canvas = await html2canvas(card, {
+            scale: 3,
+            backgroundColor: null,
+            useCORS: true
+        });
+
+        const image = canvas.toDataURL("image/png");
+
+        const { jsPDF } = window.jspdf;
+
+        const pdf = new jsPDF({
+            orientation: "landscape",
+            unit: "mm",
+            format: [85.6, 54]
+        });
+
+        pdf.addImage(image, "PNG", 0, 0, 85.6, 54);
+
+        const matricule =
+            document.getElementById("matricule").value
+            .trim().replace(/[^a-zA-Z0-9_-]/g, "_");
+
+        pdf.save("Carte_Membre_" + matricule + ".pdf");
+
+    } catch(error) {
+
+        console.error(error);
+
+        alert("Erreur pendant la création du PDF. Réessayez.");
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
